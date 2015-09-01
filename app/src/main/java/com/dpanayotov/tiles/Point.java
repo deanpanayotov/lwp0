@@ -3,13 +3,11 @@ package com.dpanayotov.tiles;
 /**
  * Created by Dean Panayotov Local on 2.9.2015
  */
-public class MyPoint {
-    String text;
+public class Point {
     public int x;
     public int y;
 
-    public MyPoint(String text, int x, int y) {
-        this.text = text;
+    public Point(int x, int y) {
         this.x = x;
         this.y = y;
     }

@@ -3,7 +3,6 @@ package com.dpanayotov.tiles;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.app.Service;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -32,7 +31,7 @@ public class TilesService extends WallpaperService {
             }
 
         };
-        private List<MyPoint> circles;
+        private List<Point> circles;
         private Paint paint = new Paint();
         private int width;
         int height;
@@ -46,7 +45,7 @@ public class TilesService extends WallpaperService {
             maxNumber = Integer
                     .valueOf(prefs.getString("numberOfCircles", "4"));
             touchEnabled = prefs.getBoolean("touch", false);
-            circles = new ArrayList<MyPoint>();
+            circles = new ArrayList<Point>();
             paint.setAntiAlias(true);
             paint.setColor(Color.WHITE);
             paint.setStyle(Paint.Style.STROKE);
@@ -93,7 +92,7 @@ public class TilesService extends WallpaperService {
                     if (canvas != null) {
                         canvas.drawColor(Color.BLACK);
                         circles.clear();
-                        circles.add(new MyPoint(String.valueOf(circles.size() + 1),(int) x,(int) y));
+                        circles.add(new Point((int) x,(int) y));
                         drawCircles(canvas, circles);
 
                     }
@@ -116,8 +115,7 @@ public class TilesService extends WallpaperService {
                     }
                     int x = (int) (width * Math.random());
                     int y = (int) (height * Math.random());
-                    circles.add(new MyPoint(String.valueOf(circles.size() + 1),
-                            x, y));
+                    circles.add(new Point(x, y));
                     drawCircles(canvas, circles);
                 }
             } finally {
@@ -131,9 +129,9 @@ public class TilesService extends WallpaperService {
         }
 
         // Surface view requires that all elements are drawn completely
-        private void drawCircles(Canvas canvas, List<MyPoint> circles) {
+        private void drawCircles(Canvas canvas, List<Point> circles) {
             canvas.drawColor(Color.BLACK);
-            for (MyPoint point : circles) {
+            for (Point point : circles) {
                 canvas.drawCircle(point.x, point.y, 20.0f, paint);
             }
         }
