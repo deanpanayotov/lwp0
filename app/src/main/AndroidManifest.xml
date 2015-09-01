@@ -7,8 +7,30 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
+
+        <service
+            android:name="TilesService"
+            android:enabled="true"
+            android:label="Wallpaper Example "
+            android:permission="android.permission.BIND_WALLPAPER" >
+            <intent-filter>
+                <action android:name="android.service.wallpaper.WallpaperService" >
+                </action>
+            </intent-filter>
+
+            <meta-data
+                android:name="android.service.wallpaper"
+                android:resource="@xml/tiles" >
+            </meta-data>
+        </service>
+
         <activity
             android:name=".PreferencesActivity"
+            android:label="@string/app_name" >
+        </activity>
+
+        <activity
+            android:name=".TilesActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -17,5 +39,10 @@
             </intent-filter>
         </activity>
     </application>
+
+    <uses-feature
+        android:name="android.software.live_wallpaper"
+        android:required="true" >
+    </uses-feature>
 
 </manifest>
