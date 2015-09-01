@@ -45,7 +45,7 @@ public class TilesService extends WallpaperService {
             maxNumber = Integer
                     .valueOf(prefs.getString("numberOfCircles", "4"));
             touchEnabled = prefs.getBoolean("touch", false);
-            circles = new ArrayList<Point>();
+            circles = new ArrayList<>();
             paint.setAntiAlias(true);
             paint.setColor(Color.WHITE);
             paint.setStyle(Paint.Style.STROKE);

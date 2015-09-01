@@ -3,7 +3,6 @@
 
     <string name="apply_wallpaper">Apply wallpaper</string>
     <string name="preferences">Preferences</string>
-
-
     <string name="wallpaper_description">Tiles</string>
+    <string name="selection_message">Please select "Tiles" live wallpaper.</string>
 </resources>

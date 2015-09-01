@@ -7,13 +7,13 @@ import android.app.FragmentTransaction;
 import android.app.WallpaperManager;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
-import android.widget.LinearLayout;
+import android.widget.Toast;
 
 /**
- * Created by Dean Panayotov Local on 2.9.2015 г..
+ * Created by Dean Panayotov Local on 2.9.2015
  */
 public class TilesActivity extends Activity{
 
@@ -24,9 +24,16 @@ public class TilesActivity extends Activity{
         findViewById(R.id.apply_wallpaper).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
-                intent.putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
-                        new ComponentName(TilesActivity.this, TilesService.class));
+                Intent intent = new Intent();
+                if (Build.VERSION.SDK_INT >= 16) {
+                    intent.setAction(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
+                    intent.putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
+                            new ComponentName(TilesActivity.this, TilesService.class));
+                } else {
+                    Toast.makeText(TilesActivity.this, R.string.selection_message, Toast
+                            .LENGTH_SHORT).show();
+                    intent.setAction(WallpaperManager.ACTION_LIVE_WALLPAPER_CHOOSER);
+                }
                 startActivity(intent);
             }
         });

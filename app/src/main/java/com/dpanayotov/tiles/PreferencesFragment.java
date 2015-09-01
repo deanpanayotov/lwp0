@@ -6,7 +6,7 @@ import android.preference.PreferenceFragment;
 import android.widget.Toast;
 
 /**
- * Created by Dean Panayotov Local on 2.9.2015.
+ * Created by Dean Panayotov Local on 2.9.2015
  */
 public class PreferencesFragment extends PreferenceFragment {
     @Override
