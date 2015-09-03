@@ -10,7 +10,6 @@ import android.graphics.Paint;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.service.wallpaper.WallpaperService;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 
@@ -139,9 +138,6 @@ public class TilesService extends WallpaperService {
                         circles.add(new Point(x, y));
                         drawCircles(canvas, circles);
                     }
-                } catch(Throwable t) {
-                    Log.d("zxc", "!!!");
-                    t.printStackTrace();
                 } finally {
                     if (canvas != null)
                         holder.unlockCanvasAndPost(canvas);
