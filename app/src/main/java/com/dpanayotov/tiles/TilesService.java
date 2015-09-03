@@ -10,6 +10,7 @@ import android.graphics.Paint;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.service.wallpaper.WallpaperService;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 
@@ -105,26 +106,29 @@ public class TilesService extends WallpaperService {
         }
 
         private void draw() {
-            SurfaceHolder holder = getSurfaceHolder();
-            Canvas canvas = null;
-            try {
-                canvas = holder.lockCanvas();
-                if (canvas != null) {
-                    if (circles.size() >= maxNumber) {
-                        circles.clear();
-                    }
-                    int x = (int) (width * Math.random());
-                    int y = (int) (height * Math.random());
-                    circles.add(new Point(x, y));
-                    drawCircles(canvas, circles);
-                }
-            } finally {
-                if (canvas != null)
-                    holder.unlockCanvasAndPost(canvas);
-            }
-            handler.removeCallbacks(drawRunner);
             if (visible) {
-                handler.postDelayed(drawRunner, 5000);
+                SurfaceHolder holder = getSurfaceHolder();
+                Canvas canvas = null;
+                try {
+                    canvas = holder.lockCanvas();
+                    if (canvas != null) {
+                        if (circles.size() >= maxNumber) {
+                            circles.clear();
+                        }
+                        int x = (int) (width * Math.random());
+                        int y = (int) (height * Math.random());
+                        circles.add(new Point(x, y));
+                        drawCircles(canvas, circles);
+                    }
+                } catch(Throwable t) {
+                    Log.d("zxc", "!!!");
+                    t.printStackTrace();
+                } finally {
+                    if (canvas != null)
+                        holder.unlockCanvasAndPost(canvas);
+                }
+                handler.removeCallbacks(drawRunner);
+                handler.postDelayed(drawRunner, 1000);
             }
         }
 
