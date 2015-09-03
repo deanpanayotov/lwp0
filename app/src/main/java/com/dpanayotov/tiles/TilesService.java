@@ -3,7 +3,9 @@ package com.dpanayotov.tiles;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -18,6 +20,7 @@ import android.view.SurfaceHolder;
  * Created by Dean Panayotov Local on 2.9.2015
  */
 public class TilesService extends WallpaperService {
+
     @Override
     public WallpaperService.Engine onCreateEngine() {
         return new MyWallpaperEngine();
@@ -39,13 +42,11 @@ public class TilesService extends WallpaperService {
         private boolean visible = true;
         private int maxNumber;
         private boolean touchEnabled;
+        private SharedPreferences prefs;
 
         public MyWallpaperEngine() {
-            SharedPreferences prefs = PreferenceManager
-                    .getDefaultSharedPreferences(TilesService.this);
-            maxNumber = Integer
-                    .valueOf(prefs.getString("numberOfCircles", "4"));
-            touchEnabled = prefs.getBoolean("touch", false);
+            initPreferences();
+            getPreferences();
             circles = new ArrayList<>();
             paint.setAntiAlias(true);
             paint.setColor(Color.WHITE);
@@ -53,6 +54,23 @@ public class TilesService extends WallpaperService {
             paint.setStrokeJoin(Paint.Join.ROUND);
             paint.setStrokeWidth(10f);
             handler.post(drawRunner);
+        }
+
+        private void initPreferences(){
+            prefs = PreferenceManager
+                    .getDefaultSharedPreferences(TilesService.this);
+            prefs.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
+                @Override
+                public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                    getPreferences();
+                }
+            });
+        }
+
+        private void getPreferences(){
+            maxNumber = Integer
+                    .valueOf(prefs.getString("numberOfCircles", "4"));
+            touchEnabled = prefs.getBoolean("touch", false);
         }
 
         @Override
