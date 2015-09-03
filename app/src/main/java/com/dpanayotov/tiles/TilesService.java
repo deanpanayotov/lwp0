@@ -3,9 +3,7 @@ package com.dpanayotov.tiles;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -42,10 +40,17 @@ public class TilesService extends WallpaperService {
         private boolean visible = true;
         private int maxNumber;
         private boolean touchEnabled;
-        private SharedPreferences prefs;
+        private SharedPreferences prefs = PreferenceManager
+                .getDefaultSharedPreferences(TilesService.this);
+        private SharedPreferences.OnSharedPreferenceChangeListener prefsListener =
+                new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                getPreferences();
+            }
+        };
 
         public MyWallpaperEngine() {
-            initPreferences();
             getPreferences();
             circles = new ArrayList<>();
             paint.setAntiAlias(true);
@@ -54,17 +59,6 @@ public class TilesService extends WallpaperService {
             paint.setStrokeJoin(Paint.Join.ROUND);
             paint.setStrokeWidth(10f);
             handler.post(drawRunner);
-        }
-
-        private void initPreferences(){
-            prefs = PreferenceManager
-                    .getDefaultSharedPreferences(TilesService.this);
-            prefs.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
-                @Override
-                public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                    getPreferences();
-                }
-            });
         }
 
         private void getPreferences(){
@@ -84,8 +78,15 @@ public class TilesService extends WallpaperService {
         }
 
         @Override
+        public void onSurfaceCreated(SurfaceHolder holder) {
+            super.onSurfaceCreated(holder);
+            prefs.registerOnSharedPreferenceChangeListener(prefsListener);
+        }
+
+        @Override
         public void onSurfaceDestroyed(SurfaceHolder holder) {
             super.onSurfaceDestroyed(holder);
+            prefs.unregisterOnSharedPreferenceChangeListener(prefsListener);
             this.visible = false;
             handler.removeCallbacks(drawRunner);
         }
