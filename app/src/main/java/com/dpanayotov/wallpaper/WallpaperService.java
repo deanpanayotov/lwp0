@@ -23,6 +23,9 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
     }
 
     private class MyWallpaperEngine extends android.service.wallpaper.WallpaperService.Engine {
+
+        private static final short FRAME = 30 //in milliseconds;
+
         private final Handler handler = new Handler();
         private final Runnable drawRunner = new Runnable() {
             @Override
@@ -142,7 +145,7 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
                         holder.unlockCanvasAndPost(canvas);
                 }
                 handler.removeCallbacks(drawRunner);
-                handler.postDelayed(drawRunner, 1000);
+                handler.postDelayed(drawRunner, FRAME);
             }
         }
 
