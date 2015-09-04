@@ -2,6 +2,7 @@ package com.dpanayotov.wallpaper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
@@ -9,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.SurfaceHolder;
 
 /**
@@ -25,13 +27,17 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
 
         private static final byte FRAME = 30; //in milliseconds;
         private short CIRCLE_RADIUS = 72;
-        private short CIRCLE_DIAMETER = (short)(CIRCLE_RADIUS * 2);
-        private short ROW_MAX_SPEED = (short)(CIRCLE_DIAMETER * 2); //per second
-        
+        private short CIRCLE_DIAMETER = (short) (CIRCLE_RADIUS * 2);
+        private short ROW_MAX_SPEED = (short) (CIRCLE_DIAMETER * 0.2); //per second
+
         private final Handler handler = new Handler();
         private final Runnable drawRunner = new Runnable() {
             @Override
             public void run() {
+                now = System.currentTimeMillis();
+                delta = (now - then) / 1000d;
+                then = now;
+                update();
                 draw();
             }
 
@@ -43,7 +49,11 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
         private short height;
         private boolean visible = true;
         private boolean restart;
+        private boolean firstUpdate = true;
 
+        private double delta;
+        private long then;
+        private long now;
 
 
         private SharedPreferences prefs = PreferenceManager
@@ -65,7 +75,6 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
             paint.setStyle(Paint.Style.STROKE);
             paint.setStrokeJoin(Paint.Join.ROUND);
             paint.setStrokeWidth(10f);
-            handler.post(drawRunner);
             paint.setStyle(Paint.Style.FILL);
         }
 
@@ -116,14 +125,8 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
                 try {
                     canvas = holder.lockCanvas();
                     if (canvas != null) {
+                        canvas.drawRGB(0,0,0);
                         drawCircles(canvas);
-//                        if (circles.size() >= maxNumber) {
-//                            circles.clear();
-//                        }
-//                        int x = (int) (width * Math.random());
-//                        int y = (int) (height * Math.random());
-//                        circles.add(new Circle(x, y));
-//                        drawCircles(canvas, circles);
                     }
                 } finally {
                     if (canvas != null)
@@ -136,8 +139,8 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
 
         // Surface view requires that all elements are drawn completely
         private void drawCircles(Canvas canvas) {
-            for (List<Circle> column : circles) {
-                for(Circle circle : column){
+            for (List<Circle> row : circles) {
+                for (Circle circle : row) {
                     canvas.drawColor(circle.c);
                     canvas.drawCircle(circle.x, circle.y, CIRCLE_RADIUS, paint);
                 }
@@ -151,22 +154,66 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
             if (force || restart) {
                 restart = false;
                 circles = new ArrayList<>();
-                List<Circle> column;
-                short w = (short) Math.ceil(((float) width) / CIRCLE_DIAMETER);
+                List<Circle> row;
                 short h = (short) Math.ceil(((float) height) / CIRCLE_DIAMETER);
-                for (int i = 0; i < w; i++) {
-                    column = new ArrayList<>();
-                    for (int j = 0; j < h; j++) {
-                        column.add(new Circle(i * CIRCLE_DIAMETER + CIRCLE_RADIUS, j * CIRCLE_DIAMETER +
-                                CIRCLE_RADIUS, generateColor()));
+                short w = (short) Math.ceil(((float) width) / CIRCLE_DIAMETER);
+
+                for (int i = 0; i < h; i++) {
+                    row = new ArrayList<>();
+                    for (int j = 0; j < w; j++) {
+                        row.add(new Circle(j * CIRCLE_DIAMETER + CIRCLE_RADIUS, i *
+                                CIRCLE_DIAMETER + CIRCLE_RADIUS, generateColor()));
                     }
-                    circles.add(column);
+                    circles.add(row);
                 }
+                rowSpeeds = new float[h];
+                Random rand = new Random();
+                for (int j = 0; j < h; j++) {
+                    rowSpeeds[j] = rand.nextFloat() * ROW_MAX_SPEED * (rand.nextBoolean() ? 1 : -1);
+                    Log.d("zxc", "zxc rowSpeed" + rowSpeeds[j]);
+                }
+                then = System.currentTimeMillis();
+                handler.post(drawRunner);
             }
         }
 
-        private int generateColor(){
+        private int generateColor() {
             return 1;
+        }
+
+        private void update() {
+            Log.d("zxc", "zxc delta: " + delta);
+            int rowIndex;
+            Circle edgeCircle, otherEdgeCircle;
+            for (List<Circle> row : circles) {
+                rowIndex = 0;
+                for (Circle circle : row) {
+                    if (firstUpdate) Log.d("zxc", "zxc xb:" + circle.x);
+                    circle.x += rowSpeeds[rowIndex] * delta;
+                    if (firstUpdate) Log.d("zxc", "zxc x:" + circle.x);
+                }
+                if (rowSpeeds[rowIndex] > 0) {
+                    edgeCircle = row.get(row.size() - 1);
+                    if (edgeCircle.x > width + CIRCLE_RADIUS) {
+                        if (firstUpdate) Log.d("zxc", "zxc shift left");
+                        otherEdgeCircle = row.get(0);
+                        row.remove(edgeCircle);
+                        edgeCircle.x = otherEdgeCircle.x - CIRCLE_DIAMETER;
+                        row.add(0, edgeCircle);
+                    }
+                } else {
+                    edgeCircle = row.get(0);
+                    if (edgeCircle.x < -CIRCLE_RADIUS) {
+                        if (firstUpdate) Log.d("zxc", "zxc shift right");
+                        otherEdgeCircle = row.get(row.size() - 1);
+                        row.remove(edgeCircle);
+                        edgeCircle.x = otherEdgeCircle.x + CIRCLE_DIAMETER;
+                        row.add(edgeCircle);
+                    }
+                }
+                rowIndex++;
+            }
+            firstUpdate = false;
         }
     }
 }
