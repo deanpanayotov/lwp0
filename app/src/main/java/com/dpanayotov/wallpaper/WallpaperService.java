@@ -24,6 +24,22 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
 
     private class MyWallpaperEngine extends android.service.wallpaper.WallpaperService.Engine {
 
+        //PALETTE
+        private final int BACKGROUND = Color.HSVToColor(new float[]{180, 0.04f, 0.21f});
+        private final ColorHSV[] colors = {
+                new ColorHSV(187, 1, 0.21f, 12, 0.08f, 0.08f),
+                new ColorHSV(187, 1, 0.31f, 12, 0.08f, 0.08f),
+                new ColorHSV(187, 1, 0.40f, 12, 0.08f, 0.08f),
+                new ColorHSV(187, 1, 0.49f, 12, 0.08f, 0.08f),
+        };
+
+        private final float[] colorsProbability = {
+                0.7f,
+                0.8f,
+                0.9f,
+                1f
+        };
+
         private static final byte FRAME = 30; //in milliseconds;
         private short CIRCLE_RADIUS = 72;
         private short CIRCLE_DIAMETER = (short) (CIRCLE_RADIUS * 2);
@@ -39,8 +55,8 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
                 update();
                 draw();
             }
-
         };
+        Random rand = new Random();
         private List<List<Circle>> circles;
         private float[] rowSpeeds;
         private Paint paint = new Paint();
@@ -124,7 +140,7 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
                 try {
                     canvas = holder.lockCanvas();
                     if (canvas != null) {
-                        canvas.drawRGB(0, 0, 0);
+                        canvas.drawColor(BACKGROUND);
                         drawCircles(canvas);
                     }
                 } finally {
@@ -140,7 +156,7 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
         private void drawCircles(Canvas canvas) {
             for (List<Circle> row : circles) {
                 for (Circle circle : row) {
-                    canvas.drawColor(circle.c);
+                    paint.setColor(circle.c);
                     canvas.drawCircle(circle.x, circle.y, CIRCLE_RADIUS, paint);
                 }
             }
@@ -167,7 +183,6 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
                     circles.add(row);
                 }
                 rowSpeeds = new float[h];
-                Random rand = new Random();
                 for (int j = 0; j < h; j++) {
                     rowSpeeds[j] = rand.nextFloat() * ROW_MAX_SPEED * (rand.nextBoolean() ? 1 : -1);
                 }
@@ -177,6 +192,14 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
         }
 
         private int generateColor() {
+            float val = rand.nextFloat();
+            float border;
+            for (int i = 0; i < colorsProbability.length; i++) {
+                border = colorsProbability[i];
+                if (val < border) {
+                    return colors[i].produceColor();
+                }
+            }
             return 1;
         }
 
