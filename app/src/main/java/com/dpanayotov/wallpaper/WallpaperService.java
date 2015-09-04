@@ -24,7 +24,10 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
     private class MyWallpaperEngine extends android.service.wallpaper.WallpaperService.Engine {
 
         private static final byte FRAME = 30; //in milliseconds;
-
+        private short CIRCLE_RADIUS = 72;
+        private short CIRCLE_DIAMETER = (short)(CIRCLE_RADIUS * 2);
+        private short ROW_MAX_SPEED = (short)(CIRCLE_DIAMETER * 2); //per second
+        
         private final Handler handler = new Handler();
         private final Runnable drawRunner = new Runnable() {
             @Override
@@ -34,14 +37,14 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
 
         };
         private List<List<Circle>> circles;
+        private float[] rowSpeeds;
         private Paint paint = new Paint();
         private short width;
         private short height;
         private boolean visible = true;
         private boolean restart;
 
-        private short circleRadius = 72;
-        private short circleDiameter = (short)(circleRadius * 2);
+
 
         private SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(WallpaperService.this);
@@ -136,7 +139,7 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
             for (List<Circle> column : circles) {
                 for(Circle circle : column){
                     canvas.drawColor(circle.c);
-                    canvas.drawCircle(circle.x, circle.y, circleRadius, paint);
+                    canvas.drawCircle(circle.x, circle.y, CIRCLE_RADIUS, paint);
                 }
             }
         }
@@ -149,13 +152,13 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
                 restart = false;
                 circles = new ArrayList<>();
                 List<Circle> column;
-                short w = (short) Math.ceil(((float) width) / circleDiameter);
-                short h = (short) Math.ceil(((float) height) / circleDiameter);
+                short w = (short) Math.ceil(((float) width) / CIRCLE_DIAMETER);
+                short h = (short) Math.ceil(((float) height) / CIRCLE_DIAMETER);
                 for (int i = 0; i < w; i++) {
                     column = new ArrayList<>();
                     for (int j = 0; j < h; j++) {
-                        column.add(new Circle(i * circleDiameter + circleRadius, j * circleDiameter +
-                                circleRadius, generateColor()));
+                        column.add(new Circle(i * CIRCLE_DIAMETER + CIRCLE_RADIUS, j * CIRCLE_DIAMETER +
+                                CIRCLE_RADIUS, generateColor()));
                     }
                     circles.add(column);
                 }
