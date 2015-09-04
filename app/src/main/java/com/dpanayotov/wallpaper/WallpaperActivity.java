@@ -1,4 +1,4 @@
-package com.dpanayotov.tiles;
+package com.dpanayotov.wallpaper;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -15,12 +15,12 @@ import android.widget.Toast;
 /**
  * Created by Dean Panayotov Local on 2.9.2015
  */
-public class TilesActivity extends Activity{
+public class WallpaperActivity extends Activity{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_tiles);
+        setContentView(R.layout.activity_wallpaper);
         findViewById(R.id.apply_wallpaper).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -28,9 +28,9 @@ public class TilesActivity extends Activity{
                 if (Build.VERSION.SDK_INT >= 16) {
                     intent.setAction(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
                     intent.putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
-                            new ComponentName(TilesActivity.this, TilesService.class));
+                            new ComponentName(WallpaperActivity.this, WallpaperService.class));
                 } else {
-                    Toast.makeText(TilesActivity.this, R.string.selection_message, Toast
+                    Toast.makeText(WallpaperActivity.this, R.string.selection_message, Toast
                             .LENGTH_SHORT).show();
                     intent.setAction(WallpaperManager.ACTION_LIVE_WALLPAPER_CHOOSER);
                 }

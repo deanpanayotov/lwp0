@@ -1,4 +1,4 @@
-package com.dpanayotov.tiles;
+package com.dpanayotov.wallpaper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,21 +9,20 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.service.wallpaper.WallpaperService;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 
 /**
  * Created by Dean Panayotov Local on 2.9.2015
  */
-public class TilesService extends WallpaperService {
+public class WallpaperService extends android.service.wallpaper.WallpaperService {
 
     @Override
-    public WallpaperService.Engine onCreateEngine() {
+    public android.service.wallpaper.WallpaperService.Engine onCreateEngine() {
         return new MyWallpaperEngine();
     }
 
-    private class MyWallpaperEngine extends WallpaperService.Engine {
+    private class MyWallpaperEngine extends android.service.wallpaper.WallpaperService.Engine {
         private final Handler handler = new Handler();
         private final Runnable drawRunner = new Runnable() {
             @Override
@@ -40,7 +39,7 @@ public class TilesService extends WallpaperService {
         private int maxNumber;
         private boolean touchEnabled;
         private SharedPreferences prefs = PreferenceManager
-                .getDefaultSharedPreferences(TilesService.this);
+                .getDefaultSharedPreferences(WallpaperService.this);
         private SharedPreferences.OnSharedPreferenceChangeListener prefsListener =
                 new SharedPreferences.OnSharedPreferenceChangeListener() {
             @Override

@@ -1,4 +1,4 @@
-package com.dpanayotov.tiles;
+package com.dpanayotov.wallpaper;
 
 import android.os.Bundle;
 import android.preference.Preference;

@@ -5,7 +5,7 @@ android {
     buildToolsVersion "22.0.1"
 
     defaultConfig {
-        applicationId "com.dpanayotov.tiles"
+        applicationId "com.dpanayotov.wallpaper"
         minSdkVersion 15
         targetSdkVersion 22
         versionCode 1

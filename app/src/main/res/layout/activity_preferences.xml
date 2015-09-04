@@ -9,7 +9,7 @@
         android:layout_height="wrap_content"/>
     <fragment
         android:id="@+id/preferences_fragment"
-        android:name="com.dpanayotov.tiles.PreferencesFragment"
+        android:name="com.dpanayotov.wallpaper.PreferencesFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:layout="@layout/abc_dialog_title_material"/>

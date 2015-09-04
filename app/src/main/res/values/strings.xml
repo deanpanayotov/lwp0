@@ -1,8 +1,8 @@
 <resources>
-    <string name="app_name">Tiles</string>
+    <string name="app_name">Wallpaper</string>
 
     <string name="apply_wallpaper">Apply wallpaper</string>
     <string name="preferences">Preferences</string>
-    <string name="wallpaper_description">Tiles</string>
-    <string name="selection_message">Please select "Tiles" live wallpaper.</string>
+    <string name="wallpaper_description">Wallpaper</string>
+    <string name="selection_message">Please select a live wallpaper.</string>
 </resources>

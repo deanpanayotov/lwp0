@@ -1,4 +1,4 @@
-package com.dpanayotov.tiles;
+package com.dpanayotov.wallpaper;
 
 /**
  * Created by Dean Panayotov Local on 2.9.2015
