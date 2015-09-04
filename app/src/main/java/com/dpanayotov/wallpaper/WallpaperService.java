@@ -9,7 +9,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 
 /**
@@ -24,7 +23,7 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
 
     private class MyWallpaperEngine extends android.service.wallpaper.WallpaperService.Engine {
 
-        private static final short FRAME = 30 //in milliseconds;
+        private static final char FRAME = 30; //in milliseconds;
 
         private final Handler handler = new Handler();
         private final Runnable drawRunner = new Runnable() {
@@ -34,22 +33,25 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
             }
 
         };
-        private List<Point> circles;
+        private List<List<Circle>> circles;
         private Paint paint = new Paint();
-        private int width;
-        int height;
+        private short width;
+        private short height;
         private boolean visible = true;
-        private int maxNumber;
-        private boolean touchEnabled;
+        private boolean restart;
+
+        private short circleRadius = 144;
+
         private SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(WallpaperService.this);
         private SharedPreferences.OnSharedPreferenceChangeListener prefsListener =
                 new SharedPreferences.OnSharedPreferenceChangeListener() {
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                getPreferences();
-            }
-        };
+                    @Override
+                    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                        getPreferences();
+                        init(true);
+                    }
+                };
 
         public MyWallpaperEngine() {
             getPreferences();
@@ -62,10 +64,10 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
             handler.post(drawRunner);
         }
 
-        private void getPreferences(){
-            maxNumber = Integer
-                    .valueOf(prefs.getString("numberOfCircles", "4"));
-            touchEnabled = prefs.getBoolean("touch", false);
+        private void getPreferences() {
+//            maxNumber = Integer
+//                    .valueOf(prefs.getString("numberOfCircles", "4"));
+//            touchEnabled = prefs.getBoolean("touch", false);
         }
 
         @Override
@@ -82,6 +84,7 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
         public void onSurfaceCreated(SurfaceHolder holder) {
             super.onSurfaceCreated(holder);
             prefs.registerOnSharedPreferenceChangeListener(prefsListener);
+            restart = true;
         }
 
         @Override
@@ -95,34 +98,10 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
         @Override
         public void onSurfaceChanged(SurfaceHolder holder, int format,
                                      int width, int height) {
-            this.width = width;
-            this.height = height;
+            this.width = (short) width;
+            this.height = (short) height;
+            init(false);
             super.onSurfaceChanged(holder, format, width, height);
-        }
-
-        @Override
-        public void onTouchEvent(MotionEvent event) {
-            if (touchEnabled) {
-
-                float x = event.getX();
-                float y = event.getY();
-                SurfaceHolder holder = getSurfaceHolder();
-                Canvas canvas = null;
-                try {
-                    canvas = holder.lockCanvas();
-                    if (canvas != null) {
-                        canvas.drawColor(Color.BLACK);
-                        circles.clear();
-                        circles.add(new Point((int) x,(int) y));
-                        drawCircles(canvas, circles);
-
-                    }
-                } finally {
-                    if (canvas != null)
-                        holder.unlockCanvasAndPost(canvas);
-                }
-                super.onTouchEvent(event);
-            }
         }
 
         private void draw() {
@@ -132,13 +111,14 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
                 try {
                     canvas = holder.lockCanvas();
                     if (canvas != null) {
-                        if (circles.size() >= maxNumber) {
-                            circles.clear();
-                        }
-                        int x = (int) (width * Math.random());
-                        int y = (int) (height * Math.random());
-                        circles.add(new Point(x, y));
-                        drawCircles(canvas, circles);
+                        drawCircles(canvas);
+//                        if (circles.size() >= maxNumber) {
+//                            circles.clear();
+//                        }
+//                        int x = (int) (width * Math.random());
+//                        int y = (int) (height * Math.random());
+//                        circles.add(new Circle(x, y));
+//                        drawCircles(canvas, circles);
                     }
                 } finally {
                     if (canvas != null)
@@ -150,11 +130,39 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
         }
 
         // Surface view requires that all elements are drawn completely
-        private void drawCircles(Canvas canvas, List<Point> circles) {
-            canvas.drawColor(Color.BLACK);
-            for (Point point : circles) {
-                canvas.drawCircle(point.x, point.y, 20.0f, paint);
+        private void drawCircles(Canvas canvas) {
+            for (List<Circle> column : circles) {
+                for(Circle circle : column){
+                    canvas.drawColor(circle.c);
+                    canvas.drawCircle(circle.x, circle.y, 20.0f, paint);
+                }
             }
+        }
+
+        /**
+         * Initialize the whole drawing process
+         */
+        private void init(boolean force) {
+            if (force || restart) {
+                restart = false;
+                circles = new ArrayList<>();
+                short halfRadius = (short) (circleRadius / 2);
+                List<Circle> column;
+                short w = (short) Math.ceil(((float) width) / circleRadius);
+                short h = (short) Math.ceil(((float) height) / circleRadius);
+                for (int i = 0; i < w; i++) {
+                    column = new ArrayList();
+                    for (int j = 0; j < h; j++) {
+                        column.add(new Circle(i * circleRadius + halfRadius, j * circleRadius +
+                                halfRadius, generateColor()));
+                    }
+                    circles.add(column);
+                }
+            }
+        }
+
+        private int generateColor(){
+            return 1;
         }
     }
 }
