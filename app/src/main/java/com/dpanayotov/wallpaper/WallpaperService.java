@@ -96,6 +96,7 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
         public void onVisibilityChanged(boolean visible) {
             this.visible = visible;
             if (visible) {
+                then = System.currentTimeMillis();
                 handler.post(drawRunner);
             } else {
                 handler.removeCallbacks(drawRunner);
