@@ -25,10 +25,10 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
 
     private class MyWallpaperEngine extends android.service.wallpaper.WallpaperService.Engine {
 
-        private static final byte FRAME = 30; //in milliseconds;
-        private short CIRCLE_RADIUS = 48;
+        private static final byte FRAME = 10; //in milliseconds;
+        private short CIRCLE_RADIUS = 160;
         private short CIRCLE_DIAMETER = (short) (CIRCLE_RADIUS * 2);
-        private short ROW_MAX_SPEED = (short) (CIRCLE_DIAMETER * 1); //per second
+        private short ROW_MAX_SPEED = (short) (CIRCLE_DIAMETER * 0.2); //per second
 
         private final Handler handler = new Handler();
         private final Runnable drawRunner = new Runnable() {
@@ -163,7 +163,7 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
                 restart = false;
                 circles = new ArrayList<>();
                 List<Circle> row;
-                arrayH = (byte) (Math.ceil(((float) height) / CIRCLE_DIAMETER) + 1);
+                arrayH = (byte) (Math.ceil(((float) height) / CIRCLE_DIAMETER) + 2);
                 arrayW = (byte) (Math.ceil(((float) width) / CIRCLE_DIAMETER) + 1);
                 lastElementIndex = (byte) (arrayW - 1);
                 short startingOffset = (short) ((width % CIRCLE_DIAMETER + CIRCLE_DIAMETER) / 2);
@@ -173,7 +173,7 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
                     row = new ArrayList<>();
                     for (int j = 0; j < arrayW; j++) {
                         row.add(new Circle(j * CIRCLE_DIAMETER - startingOffset, i *
-                                CIRCLE_DIAMETER + CIRCLE_RADIUS, ColorManager.getNextColor()));
+                                CIRCLE_DIAMETER, ColorManager.getNextColor()));
                     }
                     circles.add(row);
                 }
