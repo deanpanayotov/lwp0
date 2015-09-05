@@ -29,6 +29,7 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
         private short CIRCLE_RADIUS = 160;
         private short CIRCLE_DIAMETER = (short) (CIRCLE_RADIUS * 2);
         private short ROW_MAX_SPEED = (short) (CIRCLE_DIAMETER * 0.2); //per second
+        private short ROW_MIN_SPEED = (short) (CIRCLE_DIAMETER * 0.05);
 
         private final Handler handler = new Handler();
         private final Runnable drawRunner = new Runnable() {
@@ -181,8 +182,8 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
                 rowSpeedsInverted = new boolean[arrayH];
                 for (int j = 0; j < arrayH; j++) {
                     rowSpeedsInverted[j] = rand.nextBoolean();
-                    rowSpeeds[j] = rand.nextFloat() * ROW_MAX_SPEED * (rowSpeedsInverted[j] ? 1 :
-                            -1);
+                    rowSpeeds[j] = ( rand.nextFloat() * (ROW_MAX_SPEED - ROW_MIN_SPEED ) +
+                            ROW_MIN_SPEED ) * (rowSpeedsInverted[j] ? 1 : -1);
                 }
                 then = System.currentTimeMillis();
                 handler.post(drawRunner);
