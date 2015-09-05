@@ -6,7 +6,6 @@ import java.util.Random;
 
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -24,32 +23,43 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
 
     private class MyWallpaperEngine extends android.service.wallpaper.WallpaperService.Engine {
 
-        private static final byte FRAME = 10; //in milliseconds;
-        private short CIRCLE_RADIUS = 160;
+        private static final byte FRAMES_PER_SECOND = 100;
+        private static final byte FRAME = 1000 / FRAMES_PER_SECOND; //in milliseconds;
+        private short CIRCLE_RADIUS = 160; //in pixels
         private short CIRCLE_DIAMETER = (short) (CIRCLE_RADIUS * 2);
         private short ROW_MAX_SPEED = (short) (CIRCLE_DIAMETER * 0.2); //per second
         private short ROW_MIN_SPEED = (short) (CIRCLE_DIAMETER * 0.05);
 
         Random rand = new Random();
+        private Paint paint = new Paint();
+
         private List<List<Circle>> circles;
         private float[] rowSpeeds;
         private boolean[] rowSpeedsInverted;
 
-        private Paint paint = new Paint();
+        //dimensions
         private short width;
         private short height;
-        private short borderRight;
-        private short borderLeft = (short) -CIRCLE_RADIUS;
         private byte arrayW;
         private byte arrayH;
+
+        //magic values
+        private short borderRight;
+        private short borderLeft = (short) -CIRCLE_RADIUS;
         private byte lastElementIndex;
+
+        //lifecycle
         private boolean visible = true;
         private boolean restart;
-
         private float delta;
         private long then;
         private long now;
 
+        public MyWallpaperEngine() {
+            getPreferences();
+            paint.setAntiAlias(true);
+            paint.setStyle(Paint.Style.FILL);
+        }
 
         private SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(WallpaperService.this);
@@ -61,13 +71,6 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
                         init(true);
                     }
                 };
-
-        public MyWallpaperEngine() {
-            getPreferences();
-            circles = new ArrayList<>();
-            paint.setAntiAlias(true);
-            paint.setStyle(Paint.Style.FILL);
-        }
 
         private void getPreferences() {
 //            maxNumber = Integer
@@ -97,18 +100,17 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
         public void onSurfaceDestroyed(SurfaceHolder holder) {
             super.onSurfaceDestroyed(holder);
             prefs.unregisterOnSharedPreferenceChangeListener(prefsListener);
-            this.visible = false;
-            handler.removeCallbacks(drawRunner);
+            onVisibilityChanged(false);
         }
 
         @Override
         public void onSurfaceChanged(SurfaceHolder holder, int format,
                                      int width, int height) {
+            super.onSurfaceChanged(holder, format, width, height);
             this.width = (short) width;
             this.height = (short) height;
             this.borderRight = (short) (this.width + CIRCLE_RADIUS);
             init(false);
-            super.onSurfaceChanged(holder, format, width, height);
         }
 
         /**
@@ -122,9 +124,9 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
                 arrayH = (byte) (Math.ceil(((float) height) / CIRCLE_DIAMETER) + 2);
                 arrayW = (byte) (Math.ceil(((float) width) / CIRCLE_DIAMETER) + 1);
                 lastElementIndex = (byte) (arrayW - 1);
+
                 short startingOffset = (short) ((width % CIRCLE_DIAMETER + CIRCLE_DIAMETER) / 2);
                 ColorManager.init();
-
                 for (int i = 0; i < arrayH; i++) {
                     row = new ArrayList<>();
                     for (int j = 0; j < arrayW; j++) {
@@ -205,7 +207,6 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
                     if (canvas != null)
                         holder.unlockCanvasAndPost(canvas);
                 }
-                handler.removeCallbacks(drawRunner);
                 handler.postDelayed(drawRunner, FRAME);
             }
         }
