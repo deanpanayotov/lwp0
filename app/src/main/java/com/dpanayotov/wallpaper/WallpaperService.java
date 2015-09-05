@@ -10,7 +10,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.SurfaceHolder;
 
 /**
@@ -31,18 +30,6 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
         private short ROW_MAX_SPEED = (short) (CIRCLE_DIAMETER * 0.2); //per second
         private short ROW_MIN_SPEED = (short) (CIRCLE_DIAMETER * 0.05);
 
-        private final Handler handler = new Handler();
-        private final Runnable drawRunner = new Runnable() {
-            @Override
-            public void run() {
-                now = System.currentTimeMillis();
-                delta = (now - then) / 1000f;
-                Log.d("zxc", "zxc delta: " + delta);
-                then = now;
-                update();
-                draw();
-            }
-        };
         Random rand = new Random();
         private List<List<Circle>> circles;
         private float[] rowSpeeds;
@@ -79,10 +66,6 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
             getPreferences();
             circles = new ArrayList<>();
             paint.setAntiAlias(true);
-            paint.setColor(Color.WHITE);
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeJoin(Paint.Join.ROUND);
-            paint.setStrokeWidth(10f);
             paint.setStyle(Paint.Style.FILL);
         }
 
@@ -128,35 +111,6 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
             super.onSurfaceChanged(holder, format, width, height);
         }
 
-        private void draw() {
-            if (visible) {
-                SurfaceHolder holder = getSurfaceHolder();
-                Canvas canvas = null;
-                try {
-                    canvas = holder.lockCanvas();
-                    if (canvas != null) {
-                        canvas.drawColor(ColorManager.BACKGROUND);
-                        drawCircles(canvas);
-                    }
-                } finally {
-                    if (canvas != null)
-                        holder.unlockCanvasAndPost(canvas);
-                }
-                handler.removeCallbacks(drawRunner);
-                handler.postDelayed(drawRunner, FRAME);
-            }
-        }
-
-        // Surface view requires that all elements are drawn completely
-        private void drawCircles(Canvas canvas) {
-            for (List<Circle> row : circles) {
-                for (Circle circle : row) {
-                    paint.setColor(circle.c);
-                    canvas.drawCircle(circle.x, circle.y, CIRCLE_RADIUS, paint);
-                }
-            }
-        }
-
         /**
          * Initialize the whole drawing process
          */
@@ -191,6 +145,22 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
             }
         }
 
+        private final Handler handler = new Handler();
+        private final Runnable drawRunner = new Runnable() {
+            @Override
+            public void run() {
+                step();
+            }
+        };
+
+        private void step(){
+            now = System.currentTimeMillis();
+            delta = (now - then) / 1000f;
+            then = now;
+            update();
+            draw();
+        }
+
         private void update() {
             int rowIndex = 0;
             float speed;
@@ -218,6 +188,35 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
                     }
                 }
                 rowIndex++;
+            }
+        }
+
+        private void draw() {
+            if (visible) {
+                SurfaceHolder holder = getSurfaceHolder();
+                Canvas canvas = null;
+                try {
+                    canvas = holder.lockCanvas();
+                    if (canvas != null) {
+                        canvas.drawColor(ColorManager.BACKGROUND);
+                        drawCircles(canvas);
+                    }
+                } finally {
+                    if (canvas != null)
+                        holder.unlockCanvasAndPost(canvas);
+                }
+                handler.removeCallbacks(drawRunner);
+                handler.postDelayed(drawRunner, FRAME);
+            }
+        }
+
+        // Surface view requires that all elements are drawn completely
+        private void drawCircles(Canvas canvas) {
+            for (List<Circle> row : circles) {
+                for (Circle circle : row) {
+                    paint.setColor(circle.c);
+                    canvas.drawCircle(circle.x, circle.y, CIRCLE_RADIUS, paint);
+                }
             }
         }
     }
