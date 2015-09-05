@@ -1,7 +1,6 @@
 package com.dpanayotov.wallpaper;
 
 import android.graphics.Color;
-import android.util.Log;
 
 import java.util.Random;
 
@@ -41,7 +40,6 @@ public class ColorManager {
 
     private static int generateColor() {
         float val = rand.nextFloat();
-        Log.d("zxc", "nextFloat:" + val);
         float border;
         for (int i = 0; i < colorsProbability.length; i++) {
             border = colorsProbability[i];

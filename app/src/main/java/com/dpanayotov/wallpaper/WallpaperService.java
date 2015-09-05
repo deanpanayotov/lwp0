@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.SurfaceHolder;
 
 /**
@@ -34,7 +35,8 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
             @Override
             public void run() {
                 now = System.currentTimeMillis();
-                delta = (now - then) / 1000d;
+                delta = (now - then) / 1000f;
+                Log.d("zxc", "zxc delta: " + delta);
                 then = now;
                 update();
                 draw();
@@ -43,13 +45,15 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
         Random rand = new Random();
         private List<List<Circle>> circles;
         private float[] rowSpeeds;
+        private boolean[] rowSpeedsInverted;
+
         private Paint paint = new Paint();
         private short width;
         private short height;
         private boolean visible = true;
         private boolean restart;
 
-        private double delta;
+        private float delta;
         private long then;
         private long now;
 
@@ -167,8 +171,11 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
                     circles.add(row);
                 }
                 rowSpeeds = new float[h];
+                rowSpeedsInverted = new boolean[h];
                 for (int j = 0; j < h; j++) {
-                    rowSpeeds[j] = rand.nextFloat() * ROW_MAX_SPEED * (rand.nextBoolean() ? 1 : -1);
+                    rowSpeedsInverted[j] = rand.nextBoolean();
+                    rowSpeeds[j] = rand.nextFloat() * ROW_MAX_SPEED * (rowSpeedsInverted[j] ? 1 :
+                            -1);
                 }
                 then = System.currentTimeMillis();
                 handler.post(drawRunner);
@@ -180,11 +187,11 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
             float speed;
             Circle edgeCircle, otherEdgeCircle;
             for (List<Circle> row : circles) {
-                speed = (float) (rowSpeeds[rowIndex] * delta);
+                speed = rowSpeeds[rowIndex] * delta;
                 for (Circle circle : row) {
                     circle.x += speed;
                 }
-                if (rowSpeeds[rowIndex] > 0) {
+                if (rowSpeedsInverted[rowIndex]) {
                     edgeCircle = row.get(row.size() - 1);
                     if (edgeCircle.x > width + CIRCLE_RADIUS) {
                         otherEdgeCircle = row.get(0);
