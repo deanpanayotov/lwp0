@@ -29,6 +29,9 @@ public class ColorHSV {
     }
 
     private float fiddle(float val, float fiddle, float max) {
+        if(fiddle == 0){
+            return val;
+        }
         return Math.min(max, val + (int) (rand.nextFloat() * (fiddle) - fiddle / 2));
     }
 }
