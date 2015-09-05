@@ -25,25 +25,26 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
     private class MyWallpaperEngine extends android.service.wallpaper.WallpaperService.Engine {
 
         //PALETTE
-        private final int BACKGROUND = Color.HSVToColor(new float[]{180, 0.04f, 0.21f});
+        private final int BACKGROUND = Color.HSVToColor(new float[]{300, 1, 0.09f});
+
         private final ColorHSV[] colors = {
-                new ColorHSV(187, 1, 0.21f, 12, 0.08f, 0.08f),
-                new ColorHSV(187, 1, 0.31f, 12, 0.08f, 0.08f),
-                new ColorHSV(187, 1, 0.40f, 12, 0.08f, 0.08f),
-                new ColorHSV(187, 1, 0.49f, 12, 0.08f, 0.08f),
+                new ColorHSV(300, 1, 0.14f, 0, 0, 0f),
+                new ColorHSV(320, 0.6f, 0.24f, 0, 0f, 0f),
+                new ColorHSV(0, 0.49f, 0.52f, 0, 0f, 0f),
+                new ColorHSV(17, 0.85f, 0.60f, 0, 0f, 0f),
         };
 
         private final float[] colorsProbability = {
-                0.7f,
-                0.8f,
-                0.9f,
+                0.37f,
+                0.58f,
+                0.79f,
                 1f
         };
 
         private static final byte FRAME = 30; //in milliseconds;
-        private short CIRCLE_RADIUS = 72;
+        private short CIRCLE_RADIUS = 48;
         private short CIRCLE_DIAMETER = (short) (CIRCLE_RADIUS * 2);
-        private short ROW_MAX_SPEED = (short) (CIRCLE_DIAMETER * 0.7); //per second
+        private short ROW_MAX_SPEED = (short) (CIRCLE_DIAMETER * 1); //per second
 
         private final Handler handler = new Handler();
         private final Runnable drawRunner = new Runnable() {
