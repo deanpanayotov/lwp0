@@ -8,14 +8,14 @@ import java.util.Random;
  * Created by Dean Panayotov Local on 5.9.2015
  */
 public class ColorManager {
-    //PALETTE
+
     public static final int BACKGROUND = Color.HSVToColor(new float[]{300, 1, 0.09f});
 
     private static final ColorHSV[] colors = {
-            new ColorHSV(300, 1, 0.14f, 0, 0, 0f),
-            new ColorHSV(320, 0.6f, 0.24f, 0, 0f, 0f),
-            new ColorHSV(0, 0.49f, 0.52f, 0, 0f, 0f),
-            new ColorHSV(17, 0.85f, 0.60f, 0, 0f, 0f),
+            new ColorHSV(300, 1, 0.14f, 12, 0.08f, 0.08f),
+            new ColorHSV(320, 0.6f, 0.24f, 12, 0.08f, 0.08f),
+            new ColorHSV(0, 0.49f, 0.52f, 12, 0.08f, 0.08f),
+            new ColorHSV(17, 0.85f, 0.60f, 12, 0.08f, 0.08f),
     };
 
     private static final float[] colorsProbability = {

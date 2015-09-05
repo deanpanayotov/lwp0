@@ -211,7 +211,6 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
             }
         }
 
-        // Surface view requires that all elements are drawn completely
         private void drawCircles(Canvas canvas) {
             for (List<Circle> row : circles) {
                 for (Circle circle : row) {
