@@ -1,7 +1,6 @@
 package com.dpanayotov.wallpaper;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Random;
 
 import android.content.SharedPreferences;
@@ -43,7 +42,8 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
             }
         };
         Random rand = new Random();
-        private List<List<Circle>> circles;
+        private Circle[][] circles;
+        private byte[] circlesLastIndex;
         private float[] rowSpeeds;
         private boolean[] rowSpeedsInverted;
 
@@ -62,7 +62,6 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
         private long then;
         private long now;
 
-
         private SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(WallpaperService.this);
         private SharedPreferences.OnSharedPreferenceChangeListener prefsListener =
@@ -76,7 +75,6 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
 
         public MyWallpaperEngine() {
             getPreferences();
-            circles = new ArrayList<>();
             paint.setAntiAlias(true);
             paint.setColor(Color.WHITE);
             paint.setStyle(Paint.Style.STROKE);
@@ -147,10 +145,10 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
 
         // Surface view requires that all elements are drawn completely
         private void drawCircles(Canvas canvas) {
-            for (List<Circle> row : circles) {
-                for (Circle circle : row) {
-                    paint.setColor(circle.c);
-                    canvas.drawCircle(circle.x, circle.y, CIRCLE_RADIUS, paint);
+            for (int i = 0; i < arrayH; i++) {
+                for (int j = 0; j < arrayW; j++) {
+                    paint.setColor(circles[i][j].c);
+                    canvas.drawCircle(circles[i][j].x, circles[i][j].y, CIRCLE_RADIUS, paint);
                 }
             }
         }
@@ -161,28 +159,28 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
         private void init(boolean force) {
             if (force || restart) {
                 restart = false;
-                circles = new ArrayList<>();
-                List<Circle> row;
                 arrayH = (byte) (Math.ceil(((float) height) / CIRCLE_DIAMETER) + 1);
                 arrayW = (byte) (Math.ceil(((float) width) / CIRCLE_DIAMETER) + 1);
                 lastElementIndex = (byte) (arrayW - 1);
                 short startingOffset = (short) ((width % CIRCLE_DIAMETER + CIRCLE_DIAMETER) / 2);
                 ColorManager.init();
+                circles = new Circle[arrayH][arrayW];
 
                 for (int i = 0; i < arrayH; i++) {
-                    row = new ArrayList<>();
                     for (int j = 0; j < arrayW; j++) {
-                        row.add(new Circle(j * CIRCLE_DIAMETER - startingOffset, i *
-                                CIRCLE_DIAMETER + CIRCLE_RADIUS, ColorManager.getNextColor()));
+                        circles[i][j] = new Circle(j * CIRCLE_DIAMETER - startingOffset, i *
+                                CIRCLE_DIAMETER + CIRCLE_RADIUS, ColorManager.getNextColor());
                     }
-                    circles.add(row);
                 }
+
                 rowSpeeds = new float[arrayH];
                 rowSpeedsInverted = new boolean[arrayH];
+                circlesLastIndex = new byte[arrayH];
                 for (int j = 0; j < arrayH; j++) {
                     rowSpeedsInverted[j] = rand.nextBoolean();
-                    rowSpeeds[j] = rand.nextFloat() * ROW_MAX_SPEED * (rowSpeedsInverted[j] ? 1 :
-                            -1);
+                    circlesLastIndex[j] = rowSpeedsInverted[j] ? 0 : lastElementIndex;
+                    rowSpeeds[j] = rand.nextFloat() * ROW_MAX_SPEED * (rowSpeedsInverted[j] ? -1 :
+                            1);
                 }
                 then = System.currentTimeMillis();
                 handler.post(drawRunner);
@@ -190,32 +188,48 @@ public class WallpaperService extends android.service.wallpaper.WallpaperService
         }
 
         private void update() {
-            int rowIndex = 0;
             float speed;
-            Circle edgeCircle, otherEdgeCircle;
-            for (List<Circle> row : circles) {
-                speed = rowSpeeds[rowIndex] * delta;
-                for (Circle circle : row) {
-                    circle.x += speed;
+            for (int i = 0; i < arrayH; i++) {
+                speed = rowSpeeds[i] * delta;
+                for (int j = 0; j < arrayW; j++) {
+                    circles[i][j].x += speed;
                 }
-                if (rowSpeedsInverted[rowIndex]) {
-                    edgeCircle = row.get(lastElementIndex);
-                    if (edgeCircle.x > borderRight) {
-                        otherEdgeCircle = row.get(0);
-                        row.remove(edgeCircle);
-                        edgeCircle.x = otherEdgeCircle.x - CIRCLE_DIAMETER;
-                        row.add(0, edgeCircle);
+                if (!rowSpeedsInverted[i]) {
+                    if (circles[i][circlesLastIndex[i]].x > borderRight) {
+                        if (circlesLastIndex[i] == lastElementIndex) {
+                            circles[i][circlesLastIndex[i]].x = circles[i][0].x
+                                    - CIRCLE_DIAMETER;
+
+                        } else {
+                            circles[i][circlesLastIndex[i]].x =
+                                    circles[i][circlesLastIndex[i] + 1].x
+                                            - CIRCLE_DIAMETER;
+                        }
+                        if (circlesLastIndex[i] == 0) {
+                            circlesLastIndex[i] = lastElementIndex;
+                        } else {
+                            circlesLastIndex[i]--;
+                        }
                     }
                 } else {
-                    edgeCircle = row.get(0);
-                    if (edgeCircle.x < borderLeft) {
-                        otherEdgeCircle = row.get(lastElementIndex);
-                        row.remove(edgeCircle);
-                        edgeCircle.x = otherEdgeCircle.x + CIRCLE_DIAMETER;
-                        row.add(edgeCircle);
+                    if (circles[i][circlesLastIndex[i]].x < borderLeft) {
+                        if (circlesLastIndex[i] == 0) {
+                            circles[i][circlesLastIndex[i]].x =
+                                    circles[i][lastElementIndex].x +
+                                            CIRCLE_DIAMETER;
+                        } else {
+                            circles[i][circlesLastIndex[i]].x =
+                                    circles[i][circlesLastIndex[i] - 1].x +
+                                            CIRCLE_DIAMETER;
+                        }
+
+                        if (circlesLastIndex[i] == lastElementIndex) {
+                            circlesLastIndex[i] = 0;
+                        } else {
+                            circlesLastIndex[i]++;
+                        }
                     }
                 }
-                rowIndex++;
             }
         }
     }
